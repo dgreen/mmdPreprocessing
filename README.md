@@ -6,7 +6,7 @@ Preprocessing of MultiMarkdown Files
 
 1. Change occurences of DATELM to present today's date i.e. 26 May 2019.
 
-1. Change occurences of  DIV:text to \<div markdown="1" id="text"> .  This use to cause one to be able to use markdown syntax inside HTML blocks but it is not supported in Multimarkdown 6.
+1. Change occurences of  DIV:text to \<div markdown="1" id="text"> .  This used to cause one to use markdown syntax inside HTML blocks but it is not supported in Multimarkdown 6.
 
 1. Change occurences of TITLE to the header value to the Title: key if it exists.  Note that since it is in the header, it must have two spaces at the end of th line.
 
