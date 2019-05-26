@@ -1,0 +1,94 @@
+#!/usr/bin/env ruby
+
+# mmd2 -- only process one file #
+# Version 1.2.0 dgg -- remove <?xml ... ?> first line of file for html5 validation
+# Version 1.1.1 dgg -- change to fileutils instead of ftools
+# Version 1.1.0 dgg -- update to use new multimarkdown 3.0
+# Version 1.0.0 dgg -- derived from update-index.rb (ieee r3 work)
+
+# TBD: This could be moved into mmd2XHTML if desired for performance
+
+require 'fileutils'
+
+raise("At least one file must be specified") if (ARGV == [])
+
+# process variables from original file to .tmp file
+#    presently DATELM
+#    copy down title
+#    handle div tags
+# process with mmd2XHTML.pl (to .html file)
+# remove .tmp file
+
+# Open files for processing source MultiMarkdown file into linked MultiMarkdown file
+
+input_file_name = ARGV[0]
+orig_extension = File.extname(input_file_name)
+orig_dir = File.dirname(input_file_name)
+base_file_name = File.basename(input_file_name,orig_extension)
+temp_file_name = "#{orig_dir}/#{base_file_name}.tmp"
+output_file_name = "#{orig_dir}/#{base_file_name}.html"
+
+# multimarkdown = "multimarkdown --process-html --smart --notes --output=#{output_file_name}"
+multimarkdown = "/usr/local/bin/multimarkdown -t html --output=#{output_file_name}"
+
+inf = File.new(input_file_name, "r")
+outf = File.new(temp_file_name, "w")
+
+# compute present_date string
+today =  Time.now.strftime('%d %B %Y')
+
+# The page's title
+title = nil
+
+inf.each_line do | line |
+  line.chomp!
+  
+  # Fix up last modified information with present_date
+  line.gsub!(/DATELM/,today)
+
+  # Fix up DIV tags if in line
+  line.gsub!(/DIV:(\w+)/,'<div markdown="1" id="\1">')
+  line.gsub!(/ENDDIV/,'</div>')
+
+  # Handle title  (both discovery and replication)
+  # Note the required two spaces on the end of the line
+  line =~ /Title:\s*(.*)  $/
+  title = $1 if $1
+  line.gsub!(/TITLE/,title) if title
+
+  outf.puts line
+  
+end
+# close files
+outf.close
+inf.close
+
+# run MultiMarkdown against temp file
+
+puts "Running MultiMarkdown post processing..."  
+`#{multimarkdown} #{temp_file_name}`
+
+# Fixup the results for compliance
+#   1. Remove <?xml ...?> line
+#   2. change html tag to just html
+
+inf = File.new(output_file_name, "r")
+outf = File.new(temp_file_name, "w")
+line_count = 0;
+
+inf.each_line do | line |
+  line_count += 1
+  line.chomp!
+  
+  # Skip over the first line <?xml ... ?>
+  if line_count ==  1
+    outf.puts line if ! (line =~ /.*<?xml.*?>/)
+  else
+    outf.puts line if line_count
+  end
+end
+
+outf.close
+inf.close
+File.delete(output_file_name);
+File.rename(temp_file_name,output_file_name)
