@@ -1,22 +1,23 @@
 #!/usr/bin/env ruby
 
 # mmd2 -- only process one file #
+# Version 1.3.0 dgg -- add symbol processing
 # Version 1.2.0 dgg -- remove <?xml ... ?> first line of file for html5 validation
 # Version 1.1.1 dgg -- change to fileutils instead of ftools
 # Version 1.1.0 dgg -- update to use new multimarkdown 3.0
 # Version 1.0.0 dgg -- derived from update-index.rb (ieee r3 work)
 
-# TBD: This could be moved into mmd2XHTML if desired for performance
-
 require 'fileutils'
+require './macsymbols'
 
 raise("At least one file must be specified") if (ARGV == [])
 
 # process variables from original file to .tmp file
 #    presently DATELM
 #    copy down title
-#    handle div tags
-# process with mmd2XHTML.pl (to .html file)
+#    handle div tags (may)
+#    handle macsymbols 
+# process with multimarkedown (to .html file)
 # remove .tmp file
 
 # Open files for processing source MultiMarkdown file into linked MultiMarkdown file
@@ -46,7 +47,7 @@ inf.each_line do | line |
   # Fix up last modified information with present_date
   line.gsub!(/DATELM/,today)
 
-  # Fix up DIV tags if in line
+  # Fix up DIV tags if in line (not useful with multimarkdown 6)
   line.gsub!(/DIV:(\w+)/,'<div markdown="1" id="\1">')
   line.gsub!(/ENDDIV/,'</div>')
 
@@ -55,6 +56,8 @@ inf.each_line do | line |
   line =~ /Title:\s*(.*)  $/
   title = $1 if $1
   line.gsub!(/TITLE/,title) if title
+
+  line = line.render
 
   outf.puts line
   
