@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 # mmd2 -- only process one file #
+# Version 1.3.1 dgg -- change referencing to macsymbols
 # Version 1.3.0 dgg -- add symbol processing
 # Version 1.2.0 dgg -- remove <?xml ... ?> first line of file for html5 validation
 # Version 1.1.1 dgg -- change to fileutils instead of ftools
@@ -8,7 +9,8 @@
 # Version 1.0.0 dgg -- derived from update-index.rb (ieee r3 work)
 
 require 'fileutils'
-require './macsymbols'
+require '~/bin/macsymbols'
+# TBD: determine location of mmd and look there for macsymbols
 
 raise("At least one file must be specified") if (ARGV == [])
 
